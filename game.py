@@ -8,7 +8,7 @@ pygame.init()  # Initializes all of the imported Pygame modules
 white = (255, 255, 255)
 yellow = (255, 255, 102)
 black = (0, 0, 0)
-red = (255, 0, 0)
+red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
 
@@ -26,19 +26,24 @@ clock = pygame.time.Clock()
 # snake block
 snake_block = 10
 # snake speed
-snake_speed = 25
+snake_speed = 13
 
 # Font Style
-font_style = pygame.font.SysFont(None, 30)
+font_style = pygame.font.SysFont("bahnschrift", 25)
+score_font = pygame.font.SysFont("comicsansms", 35)
 
-### GAME REPL begin ###
+
+def our_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
 
 
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width/3, dis_height/3])
+    dis.blit(mesg, [dis_width / 6, dis_height / 3])
 
 
+### GAME REPL begin ###
 def game_loop():
     game_over = False
     game_close = False
@@ -49,6 +54,9 @@ def game_loop():
     x1_change = 0
     y1_change = 0
 
+    snake_list = []
+    length_of_snake = 1
+
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
     foody = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
 
@@ -57,8 +65,9 @@ def game_loop():
 
         # logic for cloisng our game if the user loses
         while game_close == True:
-            dis.fill(white)
-            message("You lost! Press Q to Quit or C to Play Again.", red)
+            dis.fill(blue)
+            message("You Lost! Press C-Play Again or Q-Quit", red)
+
             pygame.display.update()
 
             # check if the user wants to quit or play again
@@ -75,7 +84,6 @@ def game_loop():
             # handle a using 'Xing' out of the screen
             if event.type == pygame.QUIT:
                 game_over = True
-
             # MOVE SNAKE
             # handle key strokes to move snake
             if event.type == pygame.KEYDOWN:
@@ -92,26 +100,42 @@ def game_loop():
                     y1_change = snake_block
                     x1_change = 0
 
-            # end our game if the snake touches our screen walls
-            if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-                game_close = True
+        # end our game if the snake touches our screen walls
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
 
         # udpate our snake coordinates to now be where we moved it to
         x1 += x1_change
         y1 += y1_change
 
         # fill our game screen
-        dis.fill(white)
-        # draw our food
-        pygame.draw.rect(dis, blue, [foodx, foody, snake_block, snake_block])
-        # draw our snake
-        pygame.draw.rect(dis, black, [x1, y1, snake_block, snake_block])
-        # udpate the screen
+        dis.fill(blue)
+        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+
+        snake_head = []
+        snake_head.append(x1)
+        snake_head.append(y1)
+
+        snake_list.append(snake_head)
+
+        if len(snake_list) > length_of_snake:
+            del snake_list[0]
+
+        for x in snake_list[:-1]:
+            if x == snake_head:
+                game_close = True
+
+        our_snake(snake_block, snake_list)
+
         pygame.display.update()
 
-        # if the snake eats the food print something
         if x1 == foodx and y1 == foody:
-            print("TTTTThanksssss.")
+            foodx = round(random.randrange(
+                0, dis_width - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(
+                0, dis_height - snake_block) / 10.0) * 10.0
+
+            length_of_snake += 1
 
         # adjust clock
         clock.tick(snake_speed)
